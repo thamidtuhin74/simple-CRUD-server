@@ -2,6 +2,7 @@ const express = require('express');
 var cors = require('cors');//first line
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
+
 const app = express()
 const port = process.env.port || 5000;
 
@@ -57,6 +58,35 @@ async function run() {
       const cursor = userCollection.find()
       const result = await cursor.toArray();
       res.send(result);
+    })
+
+    // Update data
+    // updatedUser receving by server using ID
+    app.put('/users/:id', async(req, res) => {
+      const id  = req.params.id;
+      const updatedUser  = req.body;
+      console.log(updatedUser);
+      //sent updatedUser to Database using ID
+      const query = {_id: new ObjectId(id)};//filter
+      const options = {upsert: true};
+      const editUser = {
+        $set:{
+          email: updatedUser.email,
+          password: updatedUser.password
+        }
+      }
+      const result = await userCollection.updateOne(query,editUser,options);
+      res.send(result);
+      console.log(result);
+    })
+
+    // Read Single data from DB
+    app.get('/users/:id',async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const singleUser = await userCollection.findOne(query);
+      res.send(singleUser);
+      console.log('singleUser: ',singleUser);
     })
 
     
